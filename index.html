@@ -5,7 +5,7 @@
         <title>Example SMART App</title>
         <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js"></script>
         <style>
-            #patient, #meds {
+            #imagingstudy, #patient, #meds {
                 font-family: Monaco, monospace;
                 white-space: pre;
                 font-size: 13px;
@@ -16,6 +16,9 @@
         </style>
     </head>
     <body>
+        <h4>ImagingStudy for ID: 3204399</h4>
+        <div id="imagingstudy">Loading...</div>
+        <br/>
         <h4>Current Patient</h4>
         <div id="patient">Loading...</div>
         <br/>
@@ -23,6 +26,26 @@
         <div id="meds">Loading...</div>
         <script type="text/javascript">
             FHIR.oauth2.ready().then(function(client) {
+                
+                let specificImagingStudyId = "3204399";
+                // Get ImagingStudy for the selected patient
+                client.request("/ImagingStudy/" + specificImagingStudyId)
+                // Reject if no ImagingStudy are found
+                .then(function(data) {
+                    if (!data.id || data.id != specificImagingStudyId) {
+                        throw new Error("No ImagingStudy found for the selected ID");
+                    }
+                    return data;
+                })
+                // Render the current imaging studies 3204399 (or any error)
+                .then(
+                    function(imgstudy) {
+                        document.getElementById("imagingstudy").innerText = JSON.stringify(imgstudy, null, 4);
+                    },
+                    function(error) {
+                        document.getElementById("imagingstudy").innerText = error.stack;
+                    }
+                );
                 
                 // Render the current patient (or any error)
                 client.patient.read().then(
